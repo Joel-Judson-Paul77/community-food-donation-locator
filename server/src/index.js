@@ -12,7 +12,13 @@ if (inMemory) {
   console.log('⚠  No MONGO_URI set: using a temporary in-memory MongoDB seeded with demo data.');
   console.log('   Data resets on every restart. Set MONGO_URI in server/.env to keep data.');
 } else if ((await User.estimatedDocumentCount()) === 0) {
-  console.log('ℹ  Database is empty. Run "npm run seed" to load demo data.');
+  if (process.env.SEED_DEMO_DATA === 'true') {
+    // Opt-in, for demo deployments: fill an empty database once. Never touches a database that already has users.
+    await seedDatabase();
+    console.log('✔  Empty database detected: loaded demo data (SEED_DEMO_DATA=true).');
+  } else {
+    console.log('ℹ  Database is empty. Run "npm run seed" to load demo data.');
+  }
 }
 
 const server = app.listen(PORT, () => {

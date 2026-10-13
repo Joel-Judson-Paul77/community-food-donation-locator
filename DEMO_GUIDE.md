@@ -95,61 +95,46 @@ Expect 6 passing tests covering registration/login, role permissions, geo search
 
 ## C. Put it online (optional)
 
-GitHub stores code but can't run it. To give your mentor a live link, deploy to free hosting. This uses **MongoDB Atlas** (database) and **Render** (the app). In production, one Node service serves both the API and the React site.
+GitHub stores code but can't run it. To give your mentor a link, deploy to free hosting: **MongoDB Atlas** (database) + **Render** (the app). The repo includes a [`render.yaml`](render.yaml) blueprint, so most settings are filled in for you. In production, one Node service serves both the API and the React site.
 
-### 1. Create the database (MongoDB Atlas)
+### 1. Create the database (MongoDB Atlas, about 5 minutes)
 
 1. Sign up at https://www.mongodb.com/atlas and create a **free (M0)** cluster.
-2. **Database Access** → add a user with a password. Save both.
+2. **Database Access** → add a database user with a password. Save both.
 3. **Network Access** → add IP address `0.0.0.0/0` (allow from anywhere, fine for a demo).
 4. **Connect → Drivers** → copy the connection string. It looks like:
    `mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/foodshare`
-   Replace `<user>` and `<password>`, and make sure `/foodshare` comes before any `?`.
+   Replace `<user>` and `<password>` (no `<` `>` characters left) and make sure `/foodshare` sits before any `?`.
 
-### 2. Create the web service (Render)
+### 2. Deploy the app (Render, about 10 minutes)
 
 1. Sign up at https://render.com with your GitHub account.
-2. **New → Web Service** → pick the `community-food-donation-locator` repo.
-3. Fill in:
+2. **New → Blueprint** → select the `community-food-donation-locator` repo → **Apply**.
+3. When asked for **`MONGO_URI`**, paste your Atlas connection string.
+4. Wait for the first deploy (build takes a few minutes). Render then shows your link, like `https://foodshare-xxxx.onrender.com`.
 
-| Setting | Value |
-| --- | --- |
-| Runtime | Node |
-| Build Command | `npm run install-all && npm run build` |
-| Start Command | `npm start` |
-| Instance type | Free |
+That's all. The blueprint already sets `NODE_ENV=production`, a generated `JWT_SECRET`, and `SEED_DEMO_DATA=true`, which loads the demo users and listings **the first time the database is empty** (it never touches a database that already has users).
 
-4. Add **Environment Variables**:
+> No Blueprint option? Use **New → Web Service** instead with Build Command `npm run install-all && npm run build`, Start Command `npm start`, and these environment variables: `NODE_ENV=production`, `MONGO_URI`, `JWT_SECRET` (any long random string), `MONGOMS_DISABLE_POSTINSTALL=1`, `SEED_DEMO_DATA=true`.
 
-| Key | Value |
-| --- | --- |
-| `NODE_ENV` | `production` |
-| `MONGO_URI` | your Atlas connection string |
-| `JWT_SECRET` | a long random string (30+ characters) |
-| `CLIENT_URL` | your Render URL, e.g. `https://your-app.onrender.com` (set it after the first deploy shows the URL, then redeploy) |
-| `MONGOMS_DISABLE_POSTINSTALL` | `1` (skips the unneeded 600 MB MongoDB download) |
+### 3. Check it works
 
-5. Click **Create Web Service** and wait for the deploy to finish.
+Open the link, then:
+- the home page should show listings and numbers,
+- log in with a demo account from section B (for example `ravi@foodshare.test` / `Password@123`).
 
-### 3. Load the demo data (one time)
+If the page loads but there is no data, open the service's **Logs** in Render and look for the message about the database.
 
-On your own computer, create `server/.env` containing the same `MONGO_URI`, then run:
+### 4. Share it
 
-```bash
-npm run seed
-```
+Send your mentor the Render link and the demo logins from section B.
 
-⚠️ This **wipes** the database it points at and loads the demo users and listings. Only run it against a database you're happy to reset.
+### Before a demo
 
-### 4. Share the link
-
-Send your mentor the Render URL plus the demo logins from section B.
-
-### Free-tier limits
-
-- The app **sleeps after ~15 minutes idle**. The first visit afterwards takes about a minute to wake up. Open it yourself a few minutes before a demo.
-- Uploaded food photos are stored on local disk and **disappear on restart**. Listings still work and show an icon instead. For permanent photos, switch to cloud storage such as Cloudinary or S3.
-- Demo listings expire after their pickup-by time. Re-run `npm run seed` shortly before a demo to refresh them.
+- **Wake it up.** The free plan sleeps after about 15 minutes idle, and the first visit then takes about a minute. Open the link yourself a few minutes beforehand.
+- **Refresh the data.** Demo listings expire after their pickup-by time. To reset to fresh demo data, run this on your computer with `MONGO_URI` set in `server/.env`: `npm run seed` (this **wipes** that database first).
+- **Photos don't persist.** Uploaded food photos are stored on the server's disk and vanish on restart. Listings still work and show an icon. For permanent photos, use cloud storage such as Cloudinary or S3.
+- **Public passwords.** The demo accounts share a public password, so don't put real data in this deployment.
 
 ---
 

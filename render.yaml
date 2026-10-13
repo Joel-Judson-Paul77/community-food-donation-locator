@@ -1,0 +1,26 @@
+# Render Blueprint: one web service serves the API and the built React app.
+# Deploy: Render dashboard -> New -> Blueprint -> pick this repo -> paste MONGO_URI when asked.
+services:
+  - type: web
+    name: foodshare
+    runtime: node
+    plan: free
+    buildCommand: npm run install-all && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: NODE_ENV
+        value: production
+      # Skips the ~600 MB test-database download; production uses MongoDB Atlas.
+      - key: MONGOMS_DISABLE_POSTINSTALL
+        value: "1"
+      - key: JWT_SECRET
+        generateValue: true
+      # Your MongoDB Atlas connection string (you'll be prompted for it).
+      - key: MONGO_URI
+        sync: false
+      # Loads the demo users and listings the first time the database is empty.
+      - key: SEED_DEMO_DATA
+        value: "true"
