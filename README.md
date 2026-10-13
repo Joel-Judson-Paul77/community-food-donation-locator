@@ -75,6 +75,8 @@ food-donation-locator/
         └── styles.css
 ```
 
+> **Reviewing this project?** See the step-by-step **[Demo Guide](DEMO_GUIDE.md)**: run it locally, a demo walkthrough, and how to put it online.
+
 ## Getting Started
 
 **Prerequisite:** Node.js 20 or newer.
